@@ -1,0 +1,32 @@
+[
+  {
+    "uid": "usr-admin-subash",
+    "displayName": "Subash Pant (Admin)",
+    "handle": "subash_admin",
+    "email": "pantsubash30@gmail.com",
+    "passwordHash": "a2f76ae68318895d41662a3ded09f2e5449590704f3ab7544bddc6fbdb69b5c7",
+    "primaryLanguage": "NE",
+    "role": "ADMIN",
+    "createdAt": "2026-10-01T00:00:00.000Z"
+  },
+  {
+    "uid": "usr-creator-aarav",
+    "displayName": "Aarav Thapa",
+    "handle": "aarav_ktm",
+    "email": "aarav@memechowk.np",
+    "passwordHash": "febc030637a3d251086ee2e5d530572906604b42ce69504719e7da8be564da17",
+    "primaryLanguage": "NE",
+    "role": "CREATOR",
+    "createdAt": "2026-10-02T00:00:00.000Z"
+  },
+  {
+    "uid": "usr-creator-rohan",
+    "displayName": "Rohan Sharma (Friend)",
+    "handle": "rohan_delhi",
+    "email": "rohan@memechowk.in",
+    "passwordHash": "c55718ac5082b9c7b12fd36634ce46229b6ea3271bb8dff4c3124f61b33d2d0f",
+    "primaryLanguage": "HI",
+    "role": "CREATOR",
+    "createdAt": "2026-10-03T00:00:00.000Z"
+  }
+]

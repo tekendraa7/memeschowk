@@ -1,0 +1,295 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'pantsubash30@gmail.com'
+      );
+    }
+
+    // 3. Validation Blueprints (Anti-Update-Gap)
+    function isValidUserPublicProfile(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'handle', 'primaryLanguage', 'role', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'displayName', 'handle', 'primaryLanguage', 'role', 'createdAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 && data.uid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+        data.handle is string && data.handle.size() >= 2 && data.handle.size() <= 40 && data.handle.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.primaryLanguage is string && data.primaryLanguage.size() <= 16 && data.primaryLanguage in ['NE', 'HI', 'EN', 'NON_VERBAL'] &&
+        data.role is string && data.role.size() <= 16 && data.role in ['CREATOR', 'ADMIN'] &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidUserPrivateInfo(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'email', 'createdAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 && data.uid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 160 &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidChowkAccount(data) {
+      return data.keys().hasAll(['uid', 'handle', 'displayName', 'primaryLanguage', 'role', 'passwordHash', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'handle', 'displayName', 'primaryLanguage', 'role', 'passwordHash', 'createdAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 && data.uid.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.handle is string && data.handle.size() >= 2 && data.handle.size() <= 40 && data.handle.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+        data.primaryLanguage is string && data.primaryLanguage.size() <= 16 && data.primaryLanguage in ['NE', 'HI', 'EN', 'NON_VERBAL'] &&
+        data.role is string && data.role.size() <= 16 && data.role in ['CREATOR', 'ADMIN'] &&
+        data.passwordHash is string && data.passwordHash.size() >= 8 && data.passwordHash.size() <= 128 &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidPublicMemeAsset(data) {
+      return data.keys().hasAll([
+        'id', 'slug', 'title', 'mediaType', 'language', 'region', 'category', 'emotion',
+        'transcriptDeva', 'transcriptRoman', 'englishContextNote', 'originalMimeType',
+        'originalSizeBytes', 'durationMs', 'sha256Hash', 'uploaderUid', 'uploaderName',
+        'uploaderHandle', 'moderationStatus', 'viewCount', 'downloadCount', 'likeCount',
+        'favoriteCount', 'shareCount', 'remixCount', 'trendingScore', 'originalFileName',
+        'hasCloudMedia', 'hasCloudThumb', 'mediaChunkCount', 'thumbChunkCount',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'slug', 'title', 'mediaType', 'language', 'region', 'category', 'emotion',
+        'transcriptDeva', 'transcriptRoman', 'englishContextNote', 'originalMimeType',
+        'originalSizeBytes', 'durationMs', 'sha256Hash', 'uploaderUid', 'uploaderName',
+        'uploaderHandle', 'moderationStatus', 'viewCount', 'downloadCount', 'likeCount',
+        'favoriteCount', 'shareCount', 'remixCount', 'trendingScore', 'originalFileName',
+        'hasCloudMedia', 'hasCloudThumb', 'mediaChunkCount', 'thumbChunkCount',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.id is string && data.id.size() >= 1 && data.id.size() <= 128 && data.id.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.slug is string && data.slug.size() >= 1 && data.slug.size() <= 140 &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 140 &&
+      data.mediaType is string && data.mediaType.size() <= 32 && data.mediaType in [
+        'IMAGE_TEMPLATE', 'MEME_IMAGE', 'VIDEO_CLIP', 'GIF',
+        'AUDIO_DIALOGUE', 'SOUND_EFFECT', 'VOICE_RECORDING', 'CREATOR_PACK'
+      ] &&
+      data.language is string && data.language.size() <= 16 && data.language in ['NE', 'HI', 'EN', 'NON_VERBAL'] &&
+      data.region is string && data.region.size() <= 16 && data.region in ['NP', 'IN', 'SOUTH_ASIA', 'GLOBAL'] &&
+      data.category is string && data.category.size() >= 1 && data.category.size() <= 80 &&
+      data.emotion is string && data.emotion.size() >= 1 && data.emotion.size() <= 80 &&
+      data.transcriptDeva is string && data.transcriptDeva.size() >= 1 && data.transcriptDeva.size() <= 300 &&
+      data.transcriptRoman is string && data.transcriptRoman.size() >= 1 && data.transcriptRoman.size() <= 300 &&
+      data.englishContextNote is string && data.englishContextNote.size() >= 1 && data.englishContextNote.size() <= 500 &&
+      data.originalMimeType is string && data.originalMimeType.size() >= 1 && data.originalMimeType.size() <= 80 &&
+      data.originalSizeBytes is int && data.originalSizeBytes >= 0 && data.originalSizeBytes <= 50000000 &&
+      data.durationMs is int && data.durationMs >= 0 && data.durationMs <= 600000 &&
+      data.sha256Hash is string && data.sha256Hash.size() >= 1 && data.sha256Hash.size() <= 128 &&
+      data.uploaderUid is string && data.uploaderUid.size() >= 1 && data.uploaderUid.size() <= 128 && data.uploaderUid.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.uploaderName is string && data.uploaderName.size() >= 1 && data.uploaderName.size() <= 80 &&
+      data.uploaderHandle is string && data.uploaderHandle.size() >= 2 && data.uploaderHandle.size() <= 40 && data.uploaderHandle.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.moderationStatus is string && data.moderationStatus.size() <= 32 && data.moderationStatus in [
+        'UPLOADED_QUARANTINE', 'PENDING_REVIEW', 'UNDER_EMERGENCY_REVIEW',
+        'APPROVED_PUBLIC', 'REJECTED', 'TAKEDOWN_REMOVED'
+      ] &&
+      data.viewCount is int && data.viewCount >= 0 &&
+      data.downloadCount is int && data.downloadCount >= 0 &&
+      data.likeCount is int && data.likeCount >= 0 &&
+      data.favoriteCount is int && data.favoriteCount >= 0 &&
+      data.shareCount is int && data.shareCount >= 0 &&
+      data.remixCount is int && data.remixCount >= 0 &&
+      data.trendingScore is number && data.trendingScore >= 0 &&
+      data.originalFileName is string && data.originalFileName.size() >= 1 && data.originalFileName.size() <= 160 &&
+      data.hasCloudMedia is bool &&
+      data.hasCloudThumb is bool &&
+      data.mediaChunkCount is int && data.mediaChunkCount >= 0 && data.mediaChunkCount <= 40 &&
+      data.thumbChunkCount is int && data.thumbChunkCount >= 0 && data.thumbChunkCount <= 10 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidPublicAssetMediaChunk(data) {
+      return data.keys().hasAll([
+        'id', 'assetId', 'mediaKind', 'chunkIndex', 'totalChunks', 'mimeType', 'dataChunk', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'assetId', 'mediaKind', 'chunkIndex', 'totalChunks', 'mimeType', 'dataChunk', 'createdAt'
+      ]) &&
+      data.id is string && data.id.size() >= 1 && data.id.size() <= 128 && data.id.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.assetId is string && data.assetId.size() >= 1 && data.assetId.size() <= 128 && data.assetId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.mediaKind is string && data.mediaKind.size() <= 16 && data.mediaKind in ['MEDIA', 'THUMB'] &&
+      data.chunkIndex is int && data.chunkIndex >= 0 && data.chunkIndex < 40 &&
+      data.totalChunks is int && data.totalChunks >= 1 && data.totalChunks <= 40 &&
+      data.mimeType is string && data.mimeType.size() >= 1 && data.mimeType.size() <= 80 &&
+      data.dataChunk is string && data.dataChunk.size() >= 1 && data.dataChunk.size() <= 700000 &&
+      data.createdAt is timestamp;
+    }
+
+    // 4. Admins Registry (Strictly accessible ONLY to users with the ADMIN role)
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && isAdmin();
+      allow list, create, update, delete: if false;
+    }
+
+    // 5. Public Creator Profiles (/users_public/{userId}) - No PII
+    match /users_public/{userId} {
+      allow get: if isValidId(userId) && (resource == null || existing().uid == userId);
+      allow list: if existing().role in ['CREATOR', 'ADMIN'];
+
+      allow create: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUserPublicProfile(incoming()) &&
+        incoming().uid == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        (incoming().role == 'CREATOR' || isAdmin());
+
+      allow update: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUserPublicProfile(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        (
+          (incoming().role == existing().role &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'handle', 'primaryLanguage'])) ||
+          isAdmin()
+        );
+
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // 6. Isolated PII Records (/users_private/{userId}) - Strictly Owner or Admin
+    match /users_private/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isSignedIn() && existing().uid == request.auth.uid;
+
+      allow create: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUserPrivateInfo(incoming()) &&
+        incoming().uid == request.auth.uid &&
+        incoming().createdAt == request.time;
+
+      allow update: if isOwner(userId) &&
+        isValidId(userId) &&
+        isValidUserPrivateInfo(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['email']);
+
+      allow delete: if isValidId(userId) && (isOwner(userId) || isAdmin());
+    }
+
+    // 7. Cross-Instance Creator Accounts (/chowk_accounts/{handleId}) - No Email PII
+    match /chowk_accounts/{handleId} {
+      allow get: if isValidId(handleId) && (resource == null || existing().handle == handleId);
+      allow list: if existing().role in ['CREATOR', 'ADMIN'];
+
+      allow create: if isValidId(handleId) &&
+        isValidChowkAccount(incoming()) &&
+        incoming().handle == handleId &&
+        incoming().role == 'CREATOR' &&
+        incoming().createdAt == request.time;
+
+      allow update: if isValidId(handleId) &&
+        isValidChowkAccount(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().handle == existing().handle &&
+        incoming().role == existing().role &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'primaryLanguage']);
+
+      allow delete: if isValidId(handleId) && isAdmin();
+    }
+
+    // 8. Shared Public Meme & Soundboard Catalog (/public_assets/{assetId})
+    match /public_assets/{assetId} {
+      allow get: if isValidId(assetId) && (
+        resource == null ||
+        existing().moderationStatus == 'APPROVED_PUBLIC' ||
+        isAdmin()
+      );
+
+      allow list: if existing().moderationStatus == 'APPROVED_PUBLIC' ||
+        isAdmin();
+
+      allow create: if isValidId(assetId) &&
+        isValidPublicMemeAsset(incoming()) &&
+        incoming().id == assetId &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        incoming().moderationStatus in ['APPROVED_PUBLIC', 'PENDING_REVIEW'];
+
+      allow update: if isValidId(assetId) &&
+        isValidPublicMemeAsset(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().uploaderUid == existing().uploaderUid &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().sha256Hash == existing().sha256Hash &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          // Action A: Community Engagement (Like, Favorite, Share, Download, View) on APPROVED_PUBLIC assets
+          (existing().moderationStatus == 'APPROVED_PUBLIC' &&
+            incoming().moderationStatus == 'APPROVED_PUBLIC' &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'likeCount', 'favoriteCount', 'shareCount', 'downloadCount', 'viewCount', 'remixCount', 'trendingScore', 'updatedAt'
+            ])) ||
+          // Action B: Creator Media Chunk Attachment or Language/Metadata Update on non-takedown assets
+          (existing().moderationStatus != 'TAKEDOWN_REMOVED' &&
+            incoming().moderationStatus == existing().moderationStatus &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'title', 'language', 'region', 'category', 'emotion', 'transcriptDeva', 'transcriptRoman',
+              'hasCloudMedia', 'hasCloudThumb', 'mediaChunkCount', 'thumbChunkCount', 'updatedAt'
+            ]))
+        );
+
+      allow delete: if isValidId(assetId) && (
+        (isVerifiedUser() && existing().uploaderUid == request.auth.uid && existing().moderationStatus != 'TAKEDOWN_REMOVED') ||
+        isAdmin()
+      );
+    }
+
+    // 9. Shared Media & Thumbnail Chunks (/public_asset_media/{chunkId})
+    match /public_asset_media/{chunkId} {
+      allow get: if isValidId(chunkId) && (resource == null || existing().mediaKind in ['MEDIA', 'THUMB']);
+      allow list: if existing().mediaKind in ['MEDIA', 'THUMB'];
+
+      allow create: if isValidId(chunkId) &&
+        isValidPublicAssetMediaChunk(incoming()) &&
+        incoming().id == chunkId &&
+        incoming().createdAt == request.time;
+
+      allow update: if isValidId(chunkId) &&
+        isValidPublicAssetMediaChunk(incoming()) &&
+        incoming().id == existing().id &&
+        incoming().assetId == existing().assetId &&
+        incoming().mediaKind == existing().mediaKind &&
+        incoming().chunkIndex == existing().chunkIndex &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['dataChunk', 'totalChunks', 'mimeType']);
+
+      allow delete: if isValidId(chunkId) && isAdmin();
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "MemeChowk — Regional Meme, Audio & Creator Platform",
+  "description": "Mobile-first Nepali and Indian meme template, dialogue soundboard, cross-script transliteration search, and canvas remix platform.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

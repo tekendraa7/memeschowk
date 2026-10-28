@@ -1,0 +1,412 @@
+{
+  "entities": {
+    "UserPublicProfile": {
+      "title": "UserPublicProfile",
+      "description": "Publicly visible creator profile without PII.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "handle": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "primaryLanguage": {
+          "type": "string",
+          "enum": ["NE", "HI", "EN", "NON_VERBAL"],
+          "maxLength": 16
+        },
+        "role": {
+          "type": "string",
+          "enum": ["CREATOR", "ADMIN"],
+          "maxLength": 16
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "displayName", "handle", "primaryLanguage", "role", "createdAt"]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "Isolated PII record accessible strictly by the account owner or platform admin.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "ChowkAccountRecord": {
+      "title": "ChowkAccountRecord",
+      "description": "Cross-instance creator account credentials without email PII.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "handle": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "primaryLanguage": {
+          "type": "string",
+          "enum": ["NE", "HI", "EN", "NON_VERBAL"],
+          "maxLength": 16
+        },
+        "role": {
+          "type": "string",
+          "enum": ["CREATOR", "ADMIN"],
+          "maxLength": 16
+        },
+        "passwordHash": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "handle", "displayName", "primaryLanguage", "role", "passwordHash", "createdAt"]
+    },
+    "PublicMemeAsset": {
+      "title": "PublicMemeAsset",
+      "description": "Shared public meme, audio dialogue, sound effect, GIF, or video clip accessible across all friends and published links.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "mediaType": {
+          "type": "string",
+          "enum": [
+            "IMAGE_TEMPLATE",
+            "MEME_IMAGE",
+            "VIDEO_CLIP",
+            "GIF",
+            "AUDIO_DIALOGUE",
+            "SOUND_EFFECT",
+            "VOICE_RECORDING",
+            "CREATOR_PACK"
+          ],
+          "maxLength": 32
+        },
+        "language": {
+          "type": "string",
+          "enum": ["NE", "HI", "EN", "NON_VERBAL"],
+          "maxLength": 16
+        },
+        "region": {
+          "type": "string",
+          "enum": ["NP", "IN", "SOUTH_ASIA", "GLOBAL"],
+          "maxLength": 16
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "emotion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "transcriptDeva": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "transcriptRoman": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "englishContextNote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "originalMimeType": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "originalSizeBytes": {
+          "type": "integer"
+        },
+        "durationMs": {
+          "type": "integer"
+        },
+        "sha256Hash": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "uploaderUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "uploaderName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "uploaderHandle": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "moderationStatus": {
+          "type": "string",
+          "enum": [
+            "UPLOADED_QUARANTINE",
+            "PENDING_REVIEW",
+            "UNDER_EMERGENCY_REVIEW",
+            "APPROVED_PUBLIC",
+            "REJECTED",
+            "TAKEDOWN_REMOVED"
+          ],
+          "maxLength": 32
+        },
+        "viewCount": {
+          "type": "integer"
+        },
+        "downloadCount": {
+          "type": "integer"
+        },
+        "likeCount": {
+          "type": "integer"
+        },
+        "favoriteCount": {
+          "type": "integer"
+        },
+        "shareCount": {
+          "type": "integer"
+        },
+        "remixCount": {
+          "type": "integer"
+        },
+        "trendingScore": {
+          "type": "number"
+        },
+        "originalFileName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "hasCloudMedia": {
+          "type": "boolean"
+        },
+        "hasCloudThumb": {
+          "type": "boolean"
+        },
+        "mediaChunkCount": {
+          "type": "integer"
+        },
+        "thumbChunkCount": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "title",
+        "mediaType",
+        "language",
+        "region",
+        "category",
+        "emotion",
+        "transcriptDeva",
+        "transcriptRoman",
+        "englishContextNote",
+        "originalMimeType",
+        "originalSizeBytes",
+        "durationMs",
+        "sha256Hash",
+        "uploaderUid",
+        "uploaderName",
+        "uploaderHandle",
+        "moderationStatus",
+        "viewCount",
+        "downloadCount",
+        "likeCount",
+        "favoriteCount",
+        "shareCount",
+        "remixCount",
+        "trendingScore",
+        "originalFileName",
+        "hasCloudMedia",
+        "hasCloudThumb",
+        "mediaChunkCount",
+        "thumbChunkCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PublicAssetMediaChunk": {
+      "title": "PublicAssetMediaChunk",
+      "description": "Chunked base64 dataUrl payload (<650KB per chunk) for uploaded audio, video, GIF, or audio thumbnail.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "assetId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "mediaKind": {
+          "type": "string",
+          "enum": ["MEDIA", "THUMB"],
+          "maxLength": 16
+        },
+        "chunkIndex": {
+          "type": "integer"
+        },
+        "totalChunks": {
+          "type": "integer"
+        },
+        "mimeType": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "dataChunk": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 700000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "assetId",
+        "mediaKind",
+        "chunkIndex",
+        "totalChunks",
+        "mimeType",
+        "dataChunk",
+        "createdAt"
+      ]
+    },
+    "AdminAccessRecord": {
+      "title": "AdminAccessRecord",
+      "description": "Strict ADMIN role registry used by Firestore Security Rules and server checks to guard /admin access.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["ADMIN"],
+          "maxLength": 16
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "role", "grantedAt"]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminAccessRecord" },
+      "description": "Protected ADMIN role lookup collection enforcing /admin access."
+    },
+    "/users_public/{userId}": {
+      "schema": { "$ref": "#/entities/UserPublicProfile" },
+      "description": "Public creator profiles."
+    },
+    "/users_private/{userId}": {
+      "schema": { "$ref": "#/entities/UserPrivateInfo" },
+      "description": "Owner-isolated PII records."
+    },
+    "/chowk_accounts/{handleId}": {
+      "schema": { "$ref": "#/entities/ChowkAccountRecord" },
+      "description": "Cross-instance registered creator accounts."
+    },
+    "/public_assets/{assetId}": {
+      "schema": { "$ref": "#/entities/PublicMemeAsset" },
+      "description": "Shared public meme & audio catalog."
+    },
+    "/public_asset_media/{chunkId}": {
+      "schema": { "$ref": "#/entities/PublicAssetMediaChunk" },
+      "description": "Chunked media & thumbnail binaries for cross-instance playback and download."
+    }
+  }
+}
